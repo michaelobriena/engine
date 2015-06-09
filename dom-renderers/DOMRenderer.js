@@ -423,14 +423,31 @@ DOMRenderer.prototype.insertEl = function insertEl (tagName) {
         if (this._target) this._parent.element.removeChild(this._target.element);
 
         this._target = new ElementCache(document.createElement(tagName), this._path);
-        this._parent.element.appendChild(this._target.element);
+        
+        if (this.usePathOrder) {
+            this._insertElBasedOnPath(this.parent, this._target);
+        } else {
+            this._parent.element.appendChild(this._target.element);
+        }
+        this.insertIntoDOM(this.parent, this._target);
+
         this._elements[this._path] = this._target;
 
         for (var i = 0, len = this._children.length ; i < len ; i++) {
-            this._target.element.appendChild(this._children[i].element);
+            this.insertIntoDOM(this._target, this._children[i]);
         }
     }
 };
+
+DOMRenderer.prototype.insertIntoDOM = function insertIntoDOM(parent, child) {
+    if (this.usePathOrder) {
+        this._insertElBasedOnPath(this.parent, this._target);
+    } else {
+        this._parent.element.appendChild(this._target.element);
+    }  
+};
+
+function _insertElBasedOnPath(parent, child)
 
 
 /**
