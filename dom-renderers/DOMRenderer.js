@@ -423,14 +423,9 @@ DOMRenderer.prototype.insertEl = function insertEl (tagName) {
         if (this._target) this._parent.element.removeChild(this._target.element);
 
         this._target = new ElementCache(document.createElement(tagName), this._path);
-        
-        if (this.usePathOrder) {
-            this._insertElBasedOnPath(this.parent, this._target);
-        } else {
-            this._parent.element.appendChild(this._target.element);
-        }
-        this.insertIntoDOM(this.parent, this._target);
 
+        this.insertIntoDOM(this._parent, this._target);
+        
         this._elements[this._path] = this._target;
 
         for (var i = 0, len = this._children.length ; i < len ; i++) {
@@ -440,15 +435,31 @@ DOMRenderer.prototype.insertEl = function insertEl (tagName) {
 };
 
 DOMRenderer.prototype.insertIntoDOM = function insertIntoDOM(parent, child) {
-    if (this.usePathOrder) {
-        this._insertElBasedOnPath(this.parent, this._target);
+    if (this.usePathOrder || true) {
+        this._insertBasedOnPath(parent, child)
     } else {
-        this._parent.element.appendChild(this._target.element);
-    }  
+        parent.element.appendChild(child.element);
+    }
 };
 
-function _insertElBasedOnPath(parent, child)
+DOMRenderer.prototype._insertBasedOnPath = function _insertBasedOnPath(parent, child) {
+    console.log(parent.element.children);
+    var len = parent.element.children.length;
+    var index = 0;
+    var siblingPath;
 
+    while (index < len) {
+        siblingPath = parent.element.children[index].getAttribute('data-fa-path');
+        if (child.path < siblingPath) {
+            console.log('test')
+            parent.element.insertBefore(child.element, parent.element.children[index])
+            return;
+        }
+        index++;
+    }
+
+    parent.element.appendChild(child.element);
+};
 
 /**
  * Sets a property on the currently loaded target.
