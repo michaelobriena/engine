@@ -9,8 +9,6 @@ function PaddedNode(options) {
     this.layoutNode = Node.prototype.addChild.call(this);
     this.layoutNode.setSizeMode(1, 1, 0);
 
-    console.log(this.layoutNode)
-
     var _this = this;
     this.addComponent({
         onSizeChange: function() {
@@ -23,25 +21,22 @@ PaddedNode.prototype = Object.create(Node.prototype);
 PaddedNode.prototype.constructor = PaddedNode;
 
 PaddedNode.DEFAULT_PROPERTIES = {
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0
+    topPadding: 0,
+    rightPadding: 0,
+    bottomPadding: 0,
+    leftPadding: 0
 };
 
 function _layout(paddedNode) {
     if (!paddedNode.getParent()) return;
 
-    var parentSize = paddedNode.getParent().getSize();
+    var parentSize = paddedNode.getSize();
 
-    paddedNode.layoutNode.setPosition(paddedNode.options.left, paddedNode.options.top);
+    paddedNode.layoutNode.setPosition(paddedNode.options.leftPadding, paddedNode.options.topPadding);
 
-    console.log(parentSize);
-    console.log(parentSize[0], paddedNode.options.left, paddedNode.options.right);
-    console.log(parentSize[1] - paddedNode.options.top - paddedNode.options.bottom)
     paddedNode.layoutNode.setAbsoluteSize(
-        parentSize[0] - paddedNode.options.left - paddedNode.options.right,
-        parentSize[1] - paddedNode.options.top - paddedNode.options.bottom);
+        parentSize[0] - paddedNode.options.leftPadding - paddedNode.options.rightPadding,
+        parentSize[1] - paddedNode.options.topPadding - paddedNode.options.bottomPadding);
 }
 
 PaddedNode.prototype.addChild = function addChild(child) {
@@ -53,47 +48,60 @@ PaddedNode.prototype.getChildren = function getChildren() {
 };
 
 PaddedNode.prototype.setOptions = function setOptions(options) {
-    if (options.top) this.setTopPadding(options.top);
-    if (options.right) this.setRightPadding(options.right);
-    if (options.bottom) this.setBottomPadding(options.bottom);
-    if (options.left) this.setLeftPadding(options.left);
+    if (!options) return;
+    if (options.topPadding) this.setTopPadding(options.topPadding);
+    if (options.rightPadding) this.setRightPadding(options.rightPadding);
+    if (options.bottomPadding) this.setBottomPadding(options.bottomPadding);
+    if (options.leftPadding) this.setLeftPadding(options.leftPadding);
 };
 
-PaddedNode.prototype.setPadding = function setPadding() {
-    // CSS Args
+PaddedNode.prototype.getOptions = function getOptions() {
+    return this.options;
+};
+
+PaddedNode.prototype.setOption = function setOption(key, value) {
+    this.options[key] = value;
+    _layout(this);
+};
+
+PaddedNode.prototype.getOption = function getOption(key) {
+    return this.options[key];
 };
 
 PaddedNode.prototype.setTopPadding = function setTopPadding(topPadding) {
-    this.options.top = topPadding;
+    this.options.topPadding = topPadding;
+    _layout(this);
 };
 
 PaddedNode.prototype.getTopPadding = function getTopPadding(topPadding) {
-    return this.options.top;
+    return this.options.topPadding;
 };
 
 PaddedNode.prototype.setRightPadding = function setRightPadding(rightPadding) {
-    this.options.right = rightPadding;
+    this.options.rightPadding = rightPadding;
+    _layout(this);
 };
 
 PaddedNode.prototype.getRightPadding = function getRightPadding(rightPadding) {
-    return this.options.top;
+    return this.options.rightPadding;
 };
 
 PaddedNode.prototype.setBottomPadding = function setBottomPadding(bottomPadding) {
-    this.options.bottom = bottomPadding;
+    this.options.bottomPadding = bottomPadding;
+    _layout(this);
 };
 
 PaddedNode.prototype.getBottomPadding = function getBottomPadding(bottomPadding) {
-    return this.options.bottom;
+    return this.options.bottomPadding;
 };
 
 PaddedNode.prototype.setLeftPadding = function setLeftPadding(leftPadding) {
-    this.options.left = leftPadding;
+    this.options.leftPadding = leftPadding;
+    _layout(this);
 };
 
 PaddedNode.prototype.getLeftPadding = function getLeftPadding(leftPadding) {
-    return this.options.left;
+    return this.options.leftPadding;
 };
-
 
 module.exports = PaddedNode;

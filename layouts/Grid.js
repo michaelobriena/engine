@@ -4,9 +4,6 @@ function Grid(options) {
     this.options = Object.create(Grid.DEFAULT_PROPERTIES);
     Node.apply(this, options);
 
-    this.dimensions = [0, 0];
-    this.verticalSpacing = 0;
-    this.horizontalSpacing = 0;
     this.setOptions(options);
 
     _layout(this);
@@ -29,53 +26,35 @@ Grid.DEFAULT_PROPERTIES = {
 };
 
 function _layout(grid) {
-    if (!grid.getParent()) return;
-
-    var parentSize = grid.getParent().getSize();
+    var size = grid.getSize();
     var usableSize = [
-        parentSize[0] - (grid.verticalSpacing * (grid.dimensions[0] - 1)),
-        parentSize[1] - (grid.horizontalSpacing * (grid.dimensions[1] - 1))
+        size[0] - (grid.options.verticalSpacing * (grid.options.dimensions[0] - 1)),
+        size[1] - (grid.options.horizontalSpacing * (grid.options.dimensions[1] - 1))
     ];
-    var itemSize = [usableSize[0] / grid.dimensions[0], usableSize[1] / grid.dimensions[1]];
+    var itemSize = [usableSize[0] / grid.options.dimensions[0], usableSize[1] / grid.options.dimensions[1]];
     var offsetX = 0;
     var offsetY = 0;
-    var children = grid._getChildren();
+    var children = Node.prototype.getChildren.call(grid);
     var layoutNode;
 
-    for (var i = 0; i < grid.dimensions[0]; i++) {
-        for (var j = 0; j < grid.dimensions[1]; j++) {
-            layoutNode = children[i * grid.dimensions[1] + j];
+    for (var i = 0; i < grid.options.dimensions[0]; i++) {
+        for (var j = 0; j < grid.options.dimensions[1]; j++) {
+            layoutNode = children[i * grid.options.dimensions[1] + j];
+
+            if (!layoutNode) return;
+
             layoutNode.setAbsoluteSize(itemSize[0], itemSize[1]);
             layoutNode.setPosition(offsetX, offsetY);
-            offsetX += (grid.verticalSpacing + itemSize[0]);
+            offsetX += (grid.options.verticalSpacing + itemSize[0]);
         }
 
         offsetX = 0;
-        offsetY += (grid.horizontalSpacing + itemSize[1]);
+        offsetY += (grid.options.horizontalSpacing + itemSize[1]);
     }
 }
 
-function _manageLayoutNodes(grid) {
-    var totalNodesNeeded = grid.dimensions[0] * grid.dimensions[1];
-    var numChildrenNeeded = totalNodesNeeded - grid._getChildren().length;
-    var layoutNode;
-
-    while(numChildrenNeeded--) {
-        layoutNode = grid.addChild();
-        layoutNode.setSizeMode(1, 1, 0);
-
-        layoutNode.addChild();
-    };
-
-    _layout(grid);
-}
-
-Grid.prototype._getChildren = function _getChildren() {
-    return this._children;
-};
-
 Grid.prototype.getChildren = function getChildren() {
-    var children = this._getChildren();
+    var children = Node.prototype.getChildren.call(this);
     var len = children.length;
     var result = [];
 
@@ -84,16 +63,26 @@ Grid.prototype.getChildren = function getChildren() {
     return result;
 };
 
+Grid.prototype.addChild = function addChild() {
+    var layoutNode = Node.prototype.addChild.call(this);
+    layoutNode.setSizeMode(1, 1, 0);
+    layoutNode.addChild();
+    _layout(this);
+
+    return layoutNode;
+};
+
+
 Grid.prototype.getChildAtIndex = function getChildAtIndex(index) {
-    return this._getChildren()[index].getChildren()[0];
+    return Node.prototype.getChildren.call(this)[index].getChildren()[0];
 };
 
 Grid.prototype.getRow = function getRow(index) {
     var result = [];
-    var children = this._getChildren();
+    var children = Node.prototype.getChildren.call(this);
     
-    for (var i = 0; i < this.dimensions[1]; i++) {
-        result.push(children[row * this.dimensions[1] + i].getChildren()[0])
+    for (var i = 0; i < this.options.dimensions[1]; i++) {
+        result.push(children[row * this.options.dimensions[1] + i].getChildren()[0])
     }
 
     return result;
@@ -101,9 +90,9 @@ Grid.prototype.getRow = function getRow(index) {
 
 Grid.prototype.getColumn = function getColumn(index) {
     var result = [];
-    var children = this._getChildren();
+    var children = Node.prototype.getChildren.call(this);
     
-    for (var i = 0; i < this.dimensions[0]; i++) {
+    for (var i = 0; i < this.options.dimensions[0]; i++) {
         result.push(children[i])
     }
 
@@ -111,7 +100,7 @@ Grid.prototype.getColumn = function getColumn(index) {
 };
 
 Grid.prototype.getChildAtRowColumn = function getChildAtRowColumn(row, col) {
-    return this._getChildren()[row * this.dimensions[1] + col].getChildren()[0];
+    return Node.prototype.getChildren.call(this)[row * this.options.dimensions[1] + col].getChildren()[0];
 };
 
 Grid.prototype.setOptions = function setOptions(options) {
@@ -121,31 +110,30 @@ Grid.prototype.setOptions = function setOptions(options) {
 };
 
 Grid.prototype.setVerticalSpacing = function setVerticalSpacing(verticalSpacing) {
-    this.verticalSpacing = verticalSpacing;
+    this.options.verticalSpacing = verticalSpacing;
     _layout(this);
 };
 
 Grid.prototype.getVerticalSpacing = function getVerticalSpacing() {
-    return this.verticalSpacing;
+    return this.options.verticalSpacing;
 };
 
 Grid.prototype.setHorizontalSpacing = function setHorizontalSpacing(horizontalSpacing) {
-    this.horizontalSpacing = horizontalSpacing;
+    this.options.horizontalSpacing = horizontalSpacing;
     _layout(this);
 };
 
 Grid.prototype.getHorizontalSpacing = function getHorizontalSpacing() {
-    return this.horizontalSpacing;
+    return this.options.horizontalSpacing;
 };
 
 Grid.prototype.setDimensions = function setDimensions(x, y) {
-    this.dimensions[0] = x;
-    this.dimensions[1] = y;
-    _manageLayoutNodes(this);
+    this.options.dimensions[0] = x;
+    this.options.dimensions[1] = y;
 };
 
 Grid.prototype.getDimensions = function getDimensions() {
-    return this.dimensions;
+    return this.options.dimensions;
 };
 
 module.exports = Grid;

@@ -22,15 +22,15 @@ function _layout(sequential) {
 
     for (var i = 0; i < len; i++) {
         children[i].setPosition.apply(children[i], offset);
-        offset[sequential.options.direction] += children[i].getChildren()[0].getSize()[sequential.options.direction];
+        offset[sequential.options.direction] += children[i].getChildren()[0].getSize()[sequential.options.direction] + sequential.options.itemSpacing;
     }
 }
 
 Sequential.prototype.addChild = function addChild() {
     var layoutNode = Node.prototype.addChild.call(this);
     var exposedChild = layoutNode.addChild();
-
     var _this = this;
+
     exposedChild.addComponent({
         onSizeChange: function() {
             _layout(_this);
@@ -41,23 +41,40 @@ Sequential.prototype.addChild = function addChild() {
 };
 
 Sequential.prototype.setOptions = function setOptions(options) {
-    console.log(options)
+    if (!options) return;
     if (options.direction != null) this.setDirection(options.direction);
     if (options.itemSpacing) this.setItemSpacing(options.itemSpacing);
-    if (options.itemSize) this.setItemSize(options.itemSize);
+};
+
+Sequential.prototype.getOptions = function getOptions() {
+    return this.options;
+};
+
+Sequential.prototype.setOption = function setOption(key, value) {
+    this.options[key] = value;
+    _layout(this);
+};
+
+Sequential.prototype.getOption = function getOption(key) {
+    return this.options[key];
 };
 
 Sequential.prototype.setDirection = function setDirection(direction) {
-    console.log(direction)
     this.options.direction = direction;
+    _layout(this);
+};
+
+Sequential.prototype.getDirection = function getDirection() {
+    return this.options.direction;
 };
 
 Sequential.prototype.setItemSpacing = function setItemSpacing(itemSpacing) {
     this.options.itemSpacing = itemSpacing;  
+    _layout(this);
 };
 
-Sequential.prototype.setItemSize = function setItemSize(itemSize) {
-    this.options.setItemSize = setItemSize;
+Sequential.prototype.getItemSpacing = function getItemSpacing() {
+    return this.options.itemSpacing;
 };
 
 module.exports = Sequential;
