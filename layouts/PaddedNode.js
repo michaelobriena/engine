@@ -1,13 +1,15 @@
 var Node = require('../core/Node');
 
 function PaddedNode(options) {
-    this.options = options || {};
-    Node.apply(this, options);
+    this.options = Object.create(PaddedNode.DEFAULT_PROPERTIES);
+    Node.apply(this, this.options);
 
     this.setOptions(options);
 
-    this.layoutNode
+    this.layoutNode = Node.prototype.addChild.call(this);
+    this.layoutNode.setSizeMode(1, 1, 0);
 
+    console.log(this.layoutNode)
 
     var _this = this;
     this.addComponent({
@@ -32,6 +34,14 @@ function _layout(paddedNode) {
 
     var parentSize = paddedNode.getParent().getSize();
 
+    paddedNode.layoutNode.setPosition(paddedNode.options.left, paddedNode.options.top);
+
+    console.log(parentSize);
+    console.log(parentSize[0], paddedNode.options.left, paddedNode.options.right);
+    console.log(parentSize[1] - paddedNode.options.top - paddedNode.options.bottom)
+    paddedNode.layoutNode.setAbsoluteSize(
+        parentSize[0] - paddedNode.options.left - paddedNode.options.right,
+        parentSize[1] - paddedNode.options.top - paddedNode.options.bottom);
 }
 
 PaddedNode.prototype.addChild = function addChild(child) {
@@ -42,8 +52,15 @@ PaddedNode.prototype.getChildren = function getChildren() {
     return this.layoutNode.getChildren.call(this.layoutNode);
 };
 
-PaddedNode.prototype.setPadding = function getHeader() {
-    
+PaddedNode.prototype.setOptions = function setOptions(options) {
+    if (options.top) this.setTopPadding(options.top);
+    if (options.right) this.setRightPadding(options.right);
+    if (options.bottom) this.setBottomPadding(options.bottom);
+    if (options.left) this.setLeftPadding(options.left);
+};
+
+PaddedNode.prototype.setPadding = function setPadding() {
+    // CSS Args
 };
 
 PaddedNode.prototype.setTopPadding = function setTopPadding(topPadding) {
@@ -58,26 +75,25 @@ PaddedNode.prototype.setRightPadding = function setRightPadding(rightPadding) {
     this.options.right = rightPadding;
 };
 
-PaddedNode.prototype.getRightPadding = function getRightPadding(topPadding) {
+PaddedNode.prototype.getRightPadding = function getRightPadding(rightPadding) {
     return this.options.top;
 };
 
-PaddedNode.prototype.setTopPadding = function setTopPadding(topPadding) {
-    this.options.top = topPadding;
+PaddedNode.prototype.setBottomPadding = function setBottomPadding(bottomPadding) {
+    this.options.bottom = bottomPadding;
 };
 
-PaddedNode.prototype.getTopPadding = function getTopPadding(topPadding) {
-    return this.options.top;
+PaddedNode.prototype.getBottomPadding = function getBottomPadding(bottomPadding) {
+    return this.options.bottom;
 };
 
-PaddedNode.prototype.setTopPadding = function setTopPadding(topPadding) {
-    this.options.top = topPadding;
+PaddedNode.prototype.setLeftPadding = function setLeftPadding(leftPadding) {
+    this.options.left = leftPadding;
 };
 
-PaddedNode.prototype.getTopPadding = function getTopPadding(topPadding) {
-    return this.options.top;
+PaddedNode.prototype.getLeftPadding = function getLeftPadding(leftPadding) {
+    return this.options.left;
 };
-
 
 
 module.exports = PaddedNode;

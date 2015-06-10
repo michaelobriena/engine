@@ -1,7 +1,7 @@
 var Node = require('../core/Node');
 
 function Grid(options) {
-    options = options || {};
+    this.options = Object.create(Grid.DEFAULT_PROPERTIES);
     Node.apply(this, options);
 
     this.dimensions = [0, 0];
@@ -14,7 +14,6 @@ function Grid(options) {
     var _this = this;
     this.addComponent({
         onSizeChange: function(size) {
-            console.log(size)
             _layout(_this);
         }
     });
@@ -22,6 +21,12 @@ function Grid(options) {
 
 Grid.prototype = Object.create(Node.prototype);
 Grid.prototype.constructor = Grid;
+
+Grid.DEFAULT_PROPERTIES = {
+    dimensions: [0, 0],
+    verticalSpacing: 0,
+    horizontalSpacing: 0
+};
 
 function _layout(grid) {
     if (!grid.getParent()) return;
