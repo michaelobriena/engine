@@ -26,6 +26,7 @@
 
 var Context = require('./Context');
 var injectCSS = require('./inject-css');
+var containerSize = [0, 0];
 
 /**
  * Instantiates a new Compositor.
@@ -215,7 +216,9 @@ Compositor.prototype.drawCommands = function drawCommands() {
  */
 Compositor.prototype.updateSize = function updateSize() {
     for (var selector in this._contexts) {
-        this._contexts[selector].updateSize();
+        var width = containerSize[0] === 0 ? undefined : containerSize[0];
+        var height = containerSize[0] === 0 ? undefined : containerSize[1];
+        this._contexts[selector].updateSize(width, height);
     }
 };
 
@@ -254,5 +257,62 @@ Compositor.prototype.clearCommands = function clearCommands() {
     this._outCommands.length = 0;
     this._resized = false;
 };
+
+
+// iframe workaround
+window.addEventListener('message', function(e) {
+    if (e.data[0] === 'CONTAINER_SIZE') {
+        containerSize[0] = e.data[1]/2;
+        containerSize[1] = e.data[2]/2;
+        iframeHack(e.data[1] + 'px', e.data[2] + 'px');
+    }
+});
+
+function iframeHack(width, height) {
+    var css = '.famous-dom-renderer {' +
+        'max-width: ' + width + ';' +
+        'max-height: ' + height + ';' +
+        'width: ' + width + ';' +
+        'height: ' + height + ';' +
+    '}' +
+    '.famous-webgl-renderer {' +
+        'max-width: ' + width + ';' +
+        'max-height: ' + height + ';' +
+        'width: ' + width + ';' +
+        'height: ' + height + ';' +
+    '}' +
+     'body {' +
+        'max-width: ' + width + ';' +
+        'max-height: ' + height + ';' +
+        'width: ' + width + ';' +
+        'height: ' + height + ';' +
+    '}';
+
+    injectCSS(css);
+}
+
+var INJECTED = typeof document === 'undefined';
+function injectCSS(css) {
+    if (INJECTED) return;
+    INJECTED = true;
+    if (document.createStyleSheet) {
+        var sheet = document.createStyleSheet();
+        sheet.cssText = css;
+    }
+    else {
+        var head = document.getElementsByTagName('head')[0];
+        var style = document.createElement('style');
+
+        if (style.styleSheet) {
+            style.styleSheet.cssText = css;
+        }
+        else {
+            style.appendChild(document.createTextNode(css));
+        }
+
+        (head ? head : document.documentElement).appendChild(style);
+    }
+}
+
 
 module.exports = Compositor;

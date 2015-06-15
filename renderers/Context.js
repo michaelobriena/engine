@@ -95,9 +95,9 @@ function Context(selector, compositor) {
  *
  * @return {Context} this
  */
-Context.prototype.updateSize = function () {
-    var width = this._rootEl.offsetWidth;
-    var height = this._rootEl.offsetHeight;
+Context.prototype.updateSize = function (width, height) {
+    width = width || this._rootEl.offsetWidth;
+    height = height || this._rootEl.offsetHeight;
 
     this._size[0] = width;
     this._size[1] = height;
