@@ -48,7 +48,7 @@ var Commands = require('../core/Commands');
  * @param {Compositor} compositor Compositor reference to pass down to
  * WebGLRenderer.
  */
-function Context(selector, compositor) {
+function Context(selector, compositor, mobileRestriction) {
     this._compositor = compositor;
     this._rootEl = document.querySelector(selector);
     this._selector = selector;
@@ -87,6 +87,7 @@ function Context(selector, compositor) {
     this._meshSize = [0, 0, 0];
 
     this._initDOM = false;
+    this.mobileRestriction = mobileRestriction || false;
 
     this._commandCallbacks = [];
     this.initCommandCallbacks();
@@ -112,6 +113,8 @@ Context.prototype.updateSize = function () {
 
     this._compositor.sendResize(this._selector, this._size);
     if (this._webGLRenderer) this._webGLRenderer.updateSize(this._size);
+
+    if (this.mobileRestriction) iframeHack(window.innerWidth, window.innerHeight);
 
     return this;
 };

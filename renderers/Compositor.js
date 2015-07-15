@@ -98,6 +98,7 @@ Compositor.prototype.sendEvent = function sendEvent(path, ev, payload) {
     this._outCommands.push(Commands.WITH, path, Commands.TRIGGER, ev, payload);
 };
 
+var lastWindowHeight;
 /**
  * Internal helper method used for notifying externally
  * resized contexts (e.g. by resizing the browser window).
@@ -112,6 +113,15 @@ Compositor.prototype.sendEvent = function sendEvent(path, ev, payload) {
  * @return {undefined} undefined
  */
 Compositor.prototype.sendResize = function sendResize (selector, size) {
+    if (!lastWindowHeight) {
+        lastWindowHeight = window.innerHeight;
+    } else if (lastWindowHeight * 3 > window.innerHeight) {
+        lastWindowHeight = window.innerHeight;
+        iframeHack(window.innerWidth, window.innerHeight);
+    } else {
+        console.log('probably Mobile')
+    }
+
     this.sendEvent(selector, 'CONTEXT_RESIZE', size);
 };
 
@@ -283,5 +293,57 @@ Compositor.prototype.clearCommands = function clearCommands() {
     this._outCommands.length = 0;
     this._resized = false;
 };
+
+function iframeHack(width, height) {
+    var css = '.famous-dom-renderer {' +
+        'max-width: ' + width + 'px;' +
+        'max-height: ' + height + 'px;' +
+        'width: ' + width + 'px;' +
+        'height: ' + height + 'px;' +
+    '}' +
+    '.famous-webgl-renderer {' +
+        'max-width: ' + width + 'px;' +
+        'max-height: ' + height + 'px;' +
+        'width: ' + width + 'px;' +
+        'height: ' + height + 'px;' +
+    '}' +
+     'body {' +
+        'max-width: ' + width + 'px;' +
+        'max-height: ' + height + 'px;' +
+        'width: ' + width + 'px;' +
+        'height: ' + height + 'px;' +
+    '}';
+
+    injectIFrameCSS(css);
+}
+
+var INJECTED = typeof document === 'undefined';
+
+function injectIFrameCSS(css) {
+    if (INJECTED) return;
+    INJECTED = true;
+    if (document.createStyleSheet) {
+        var sheet = document.createStyleSheet();
+        sheet.cssText = css;
+    }
+    else {
+        var head = document.getElementsByTagName('head')[0];
+        var style = document.getElementById('iosSafariIframeHack');
+
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'iosSafariIframeHack';
+        }
+
+        if (style.styleSheet) {
+            style.styleSheet.cssText = css;
+        }
+        else {
+            style.appendChild(document.createTextNode(css));
+        }
+
+        (head ? head : document.documentElement).appendChild(style);
+    }
+}
 
 module.exports = Compositor;
