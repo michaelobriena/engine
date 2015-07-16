@@ -93,8 +93,8 @@ function FamousEngine() {
  *
  * @return {FamousEngine} this
  */
-FamousEngine.prototype.init = function init(options, mobileRestriction) {
-    this.compositor = options && options.compositor || new Compositor(mobileRestriction);
+FamousEngine.prototype.init = function init(options) {
+    this.compositor = options && options.compositor || new Compositor();
     this.renderLoop = options && options.renderLoop || new RequestAnimationFrameLoop();
     this.uiManager = new UIManager(this.getChannel(), this.compositor, this.renderLoop);
     return this;

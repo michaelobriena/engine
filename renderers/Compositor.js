@@ -116,6 +116,7 @@ Compositor.prototype.sendResize = function sendResize (selector, size) {
     if (!lastWindowHeight) {
         lastWindowHeight = window.innerHeight;
     } else if (lastWindowHeight * 3 > window.innerHeight) {
+        console.log('test')
         lastWindowHeight = window.innerHeight;
         iframeHack(window.innerWidth, window.innerHeight);
     } else {
@@ -317,11 +318,7 @@ function iframeHack(width, height) {
     injectIFrameCSS(css);
 }
 
-var INJECTED = typeof document === 'undefined';
-
 function injectIFrameCSS(css) {
-    if (INJECTED) return;
-    INJECTED = true;
     if (document.createStyleSheet) {
         var sheet = document.createStyleSheet();
         sheet.cssText = css;
